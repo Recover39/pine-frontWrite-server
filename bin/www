@@ -1,0 +1,63 @@
+#!/usr/bin/env node
+/**
+ * Created by YoungKim on 2014. 9. 3
+ */
+
+'use strict';
+
+var global = require('./global');
+var app = require(SOURCE_ROOT + '/app');
+
+var cluster = require('cluster');
+var numCPUs = require('os').cpus().length;
+
+//cluster 사용시작
+if (cluster.isMaster) {
+
+    info('SETTING is ' + SETTING.flag);
+
+    //init queue one time
+    (function () {
+        //create rabbitMQ connection
+        var connection = require(SOURCE_ROOT + '/worker/rabbitmq').getConn();
+
+        //make queue
+        connection.on('ready', function () {
+            // declare queue
+            var requestQueueList = SETTING.rabbitQueueList;
+
+            requestQueueList.forEach(function (queueName) {
+                connection.queue(queueName, {autoDelete: false, durable: true}, function () {
+                    console.log('\n///////////////////////////////////\n' +
+                        '//////' + queueName + ' init complete ///\n' +
+                        '////////////////////////////////////\n');
+                });
+            });
+        });
+
+        //make queue fail, auto reconnect
+        connection.on('error', function () {
+            error('fail to connect rabbitmq server -- try to reconnect');
+        });
+    })();
+
+    for (var i = 0; i < numCPUs; i++) {
+        cluster.fork();
+    }
+} else {
+    SETTING.ports.forEach(function (port) {
+        app.set('port', process.env.PORT || port);
+
+        var server = app.listen(app.get('port'), function () {
+            info('frontWrite server listening on port ' + server.address().port);
+        });
+    });
+}
+
+//app.set('port', process.env.PORT || 4000);
+//
+//var server = app.listen(app.get('port'), function () {
+//    console.log('\n//////////////////////////////////////////////////\n' +
+//        '//// frontWrite Server listening on port ' + app.get('port') + ' ////' +
+//        '\n//////////////////////////////////////////////////');
+//});
