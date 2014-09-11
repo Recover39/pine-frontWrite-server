@@ -13,23 +13,32 @@ var express = require('express'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser');
 
-var router = require('./middleware/router');
-
 var app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', PROJECT_ROOT + '/views');
 app.set('view engine', 'jade');
+app.use(express.static(PROJECT_ROOT + '/public'));
+
 app.set('env', env);
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/test', function (req, res) {
+    res.render('test');
+});
+
+var threadRouter = require(SOURCE_ROOT + '/middleware/threadRouter');
+//var commentRouter = require(SOURCE_ROOT + '/middleware/commentRouter');
+
+app.route('/threads', threadRouter);
+//app.use('/comments', commentRouter);
 
 //route
-router.route(app);
+//router.route(app);
 
 //404 error
 app.use(function (req, res, next) {

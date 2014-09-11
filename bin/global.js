@@ -5,8 +5,8 @@
 var path = require('path'),
     debug = require('debug');
 
-if (process.env.WRITE_SERVER_SETTING === 'undefined' || process.env.WRITE_SERVER_SETTINGS === undefined) {
-    throw new Error('export WRITE_SERVER_SETTINGS (local or development, production) required.');
+if (process.env.WRITE_SERVER_SETTING === 'undefined' || process.env.WRITE_SERVER_SETTING === undefined) {
+    throw new Error('export WRITE_SERVER_SETTING (local or development, production) required.');
 }
 
 SETTING = {};
@@ -21,7 +21,7 @@ error = debug('error:');
 error.log = console.error.bind(console);
 
 (function () {
-    var env = process.env.WRITE_SERVER_SETTINGS;
+    var env = process.env.WRITE_SERVER_SETTING;
 
     var local = {
         flag: 'local',
@@ -77,7 +77,7 @@ error.log = console.error.bind(console);
             SETTING = production;
             break;
         default :
-            throw new Error('export WRITE_SERVER_SETTINGS (local or development, production) required.');
+            throw new Error('export WRITE_SERVER_SETTING (local or development, production) required.');
     }
 })();
 
