@@ -55,8 +55,8 @@ router.post('/:thread_id/block', function (req, res) {
     threadHandler.threadRequestHandler('threadBlock', req, res);
 });
 
-router.post('/:thread_id/hide', function (req, res) {
-    threadHandler.threadRequestHandler('threadHide', req, res);
-});
+// router.post('/:thread_id/hide', function (req, res) {
+//     threadHandler.threadRequestHandler('threadHide', req, res);
+// });
 
 module.exports = router;

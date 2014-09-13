@@ -39,7 +39,7 @@ exports.postNewThread = function (req, res) {
                 content: req.body.content,
                 image_url: image_url,
                 pub_date: new Date().getTime(),
-                action: 'newThread_textOnly'
+                action: 'newThread'
             };
 
             connection.publish(serviceQueueName, message);
@@ -60,9 +60,6 @@ exports.postNewThread = function (req, res) {
 exports.addComment = function (req, res) {
     var connection = rabbitmq.getConn();
 
-    //set queue name, action name (identifier)
-    var mQueryAction = 'commentAdd';
-
     session.getUsername(req.cookies.sessionId, function (err, result) {
         if (err) throw err;
 
@@ -79,7 +76,7 @@ exports.addComment = function (req, res) {
             author: result,
             content: req.body.content,
             pub_date: new Date().getTime(),
-            action: mQueryAction
+            action: 'commentAdd'
         };
 
         connection.publish(serviceQueueName, message);

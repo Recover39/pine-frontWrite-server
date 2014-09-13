@@ -16,7 +16,8 @@ exports.registerUser = function (req, res) {
 
         //data to send
         var message = {
-            userName : req.body.userName
+            Id : req.body.userName,
+            action : 'userRegister'
         };
 
         connection.publish(serviceQueueName, message);
