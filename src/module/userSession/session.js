@@ -8,16 +8,15 @@
 var uuid = require('node-uuid');
 var async = require('async');
 
-var connection = require(SOURCE_ROOT+'/session/redis/redisconnection').getConnection();
+var connection = require(SOURCE_ROOT+'/module/redis/redisconnection').getConnection();
 var error = require('./_error');
 
-
+//six hours
 var EXPIRE_SESSION_TIME = 6 * 60 * 60;    // seconds
 
 var SCHEMA = 'session:';
 var COL_USERNAME = 'username';
 var COL_EXPIRE_DATE = 'expire_date';
-
 
 /**
  * @class session

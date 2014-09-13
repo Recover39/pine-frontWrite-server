@@ -1,25 +1,26 @@
 'use strict';
 
 var redis = require('redis');
-var error = require('./_error');
+var customError = require('./_error');
 
 var redisconnection = {};
 
-var client = redis.createClient(6379, 'localhost');
+var client = redis.createClient(SETTING.redis.port, SETTING.redis.host);
 var connected = true;
 var errorCount = 0;
 
 client.on('error', function (err) {
     connected = false;
-    console.warn('Redis connection ' + errorCount++ + ' error: ' + err);
-    console.warn('Trying to reconnect...');
+    error('Redis connection ' + ++errorCount + ' error: ' + err);
+    error('Trying to reconnect...');
     setTimeout(function () {
-        if (errorCount > 10) throw new error.RedisConnectionError('Error: Can not connect redis.');
-        client = redis.createClient(GLOBAL.db.port, GLOBAL.db.host);
+        if (errorCount > 10) throw new customError.RedisConnectionError('Error: Can not connect redis.');
+        client = redis.createClient(SETTING.redis.port, SETTING.redis.host);
     }, 1000);
 });
+
 client.on('connect', function () {
-    console.log('Redis connected: ' + new Date());
+    console.log('Redis connected: ' + new Date() + '\n');
     connected = true;
 });
 

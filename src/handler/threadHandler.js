@@ -5,35 +5,40 @@
 'use strict';
 
 var rabbitmq = require('./rabbitmq');
+var session = require(SOURCE_ROOT + '/module/userSession/session');
 
 var serviceQueueName = 'requestQueue';
 
 //send card info without photo to queue
-var textOnlyNewCardQuery = function (request, response) {
+exports.textOnlyNewCardQuery = function (req, res) {
     //is_public field error detection
-    if (request.body.is_public === 'true' || request.body.is_public === 'false') {
+    if (req.body.is_public === 'true') {
         var connection = rabbitmq.getConn();
 
-        //data to send
-        var message = {
-            author: request.body.author,
-            is_public: request.body.is_public,
-            content: request.body.content,
-            pub_date: new Date().getTime(),
-            action: 'newThread_textOnly'
-        };
+        session.getUsername(req.body.author, function (err, result) {
+            if (err) throw err;
 
-        connection.publish(serviceQueueName, message);
+            //data to send
+            var message = {
+                author: result,
+                is_public: req.body.is_public,
+                content: req.body.content,
+                pub_date: new Date().getTime(),
+                action: 'newThread_textOnly'
+            };
 
-        //success
-        response.contentType('application/json');
-        response.send({result: "SUCCESS"});
+            connection.publish(serviceQueueName, message);
+
+            //success
+            res.contentType('application/json');
+            res.send({result: "SUCCESS"});
+        });
     }
     //is_public field data error occurred
     else {
         //fail
-        response.contentType('application/json');
-        response.send({result: "FAIL", message: 'error message'});
+        res.contentType('application/json');
+        res.send({result: "FAIL", message: 'error message'});
     }
 };
 
@@ -94,25 +99,26 @@ exports.addComment = function (req, res) {
         var connection = rabbitmq.getConn();
 
         //set queue name, action name (identifier)
-        var mQueryAction = 'commentAdd',
-            mQueueName = serviceQueueName;
+        var mQueryAction = 'commentAdd';
 
-        //data to send
-        var message = {
-            thread_id: req.params.thread_id,
-            author: req.body.user,
-            content: req.body.content,
-            pub_date: new Date().getTime(),
-            action: mQueryAction
-        };
+        session.getUsername(req.body.user, function (err, result) {
+            if (err) throw err;
 
-        connection.on('ready', function() {
-            connection.publish(mQueueName, message);
+            //data to send
+            var message = {
+                thread_id: req.thread_id,
+                author: result,
+                content: req.body.content,
+                pub_date: new Date().getTime(),
+                action: mQueryAction
+            };
+
+            connection.publish(serviceQueueName, message);
+
+            //success
+            res.contentType('application/json');
+            res.send({result: "SUCCESS"});
         });
-
-        //success
-        res.contentType('application/json');
-        res.send({result: "SUCCESS"});
     }
     //Content-Type error
     else {
@@ -122,103 +128,37 @@ exports.addComment = function (req, res) {
     }
 };
 
-var simpleThreadRequest = function (action, queueName, request, response) {
-    var reqContentType = request.get('Content-Type');
+exports.threadRequestHandler = function (action, req, res) {
+    var reqContentType = req.get('Content-Type');
 
     if (reqContentType === 'application/json') {
         var connection = rabbitmq.getConn();
 
-        //set queue name, action name (identifier)
-        var mQueryAction = String(action),
-            mQueueName = String(queueName);
+        //set action name (identifier)
+        var mQueryAction = String(action);
 
-        //data to send
-        var message = {
-            thread_id: request.params.thread_id,
-            user: request.body.user,
-            time: new Date().getTime(),
-            action: mQueryAction
-        };
+        session.getUsername(req.body.user, function (err, result) {
+            if (err) throw err;
 
-        connection.on('ready', function() {
-            connection.publish(mQueueName, message);
+            //data to send
+            var message = {
+                thread_id: req.thread_id,
+                user: result,
+                time: new Date().getTime(),
+                action: mQueryAction
+            };
+
+            connection.publish(serviceQueueName, message);
+
+            //success
+            res.contentType('application/json');
+            res.send({result: "SUCCESS", message: message});
         });
-
-        //success
-        response.contentType('application/json');
-        response.send({result: "SUCCESS"});
     }
     //Content-Type error
     else {
         //fail
-        response.contentType('application/json');
-        response.send({result: "FAIL", message: 'error message'});
+        res.contentType('application/json');
+        res.send({result: "FAIL", message: 'error message'});
     }
-};
-
-var simpleCommentRequest = function (action, queueName, request, response) {
-    var reqContentType = request.get('Content-Type');
-
-    if (reqContentType === 'application/json') {
-        var connection = rabbitmq.getConn();
-
-        //set queue name, action name (identifier)
-        var mQueryAction = String(action),
-            mQueueName = String(queueName);
-
-        //data to send
-        var message = {
-            comment_id: request.params.comment_id,
-            user: request.body.user,
-            time: new Date().getTime(),
-            action: mQueryAction
-        };
-
-        connection.on('ready', function() {
-            connection.publish(mQueueName, message);
-        });
-
-        //success
-        response.contentType('application/json');
-        response.send({result: "SUCCESS"});
-    }
-    //Content-Type error
-    else {
-        //fail
-        response.contentType('application/json');
-        response.send({result: "FAIL", message: 'error message'});
-    }
-
-};
-
-exports.likeThread = function (req, res) {
-    simpleThreadRequest('threadLike', serviceQueueName, req, res);
-};
-
-exports.unlikeThread = function (req, res) {
-    simpleThreadRequest('threadUnlike', serviceQueueName, req, res);
-};
-
-exports.reportThread = function (req, res) {
-    simpleThreadRequest('threadReport', serviceQueueName, req, res);
-};
-
-exports.blockThread = function (req, res) {
-    simpleThreadRequest('threadHide', serviceQueueName, req, res);
-};
-
-exports.likeComment = function (req, res) {
-    simpleCommentRequest('commentLike', serviceQueueName, req, res);
-};
-
-exports.unlikeComment = function (req, res) {
-    simpleCommentRequest('commentUnlike', serviceQueueName, req, res);
-};
-
-exports.reportComment = function (req, res) {
-    simpleCommentRequest('commentReport', serviceQueueName, req, res);
-};
-
-exports.blockComment = function (req, res) {
-    simpleCommentRequest('commentBlock', serviceQueueName, req, res);
 };

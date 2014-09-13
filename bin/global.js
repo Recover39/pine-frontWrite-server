@@ -42,12 +42,14 @@ error.log = console.error.bind(console);
         flag: 'development',
         ports: [8001, 8002, 8003, 8004],
         rabbitConfig: {
-            host: 'http://125.209.193.216/', port: 5672,
-            login: 'admin', password: 'password',
-            authMechanism: 'AMQPLAIN'
+            host: '125.209.193.216', port: 5672,
+            login: 'recover39', password: 'recover',
+            connectionTimeout: 10, authMechanism: 'AMQPLAIN',
+            vhost: '/', noDelay: true
         },
+        rabbitQueueList: ['requestQueue'],
         redis: {
-            host: 'localhost',
+            host: '125.209.193.216',
             port: 6379
         }
     };

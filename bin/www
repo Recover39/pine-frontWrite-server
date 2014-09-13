@@ -55,34 +55,45 @@ var app = require(SOURCE_ROOT + '/app');
 //}
 
 //init queue one time
-//(function () {
-//    //create rabbitMQ connection
-//    var connection = require(SOURCE_ROOT + '/handler/rabbitmq').getConn();
-//
-//    //make queue
-//    connection.on('ready', function () {
-//        // declare queue
-//        var requestQueueList = SETTING.rabbitQueueList;
-//
-//        requestQueueList.forEach(function (queueName) {
-//            connection.queue(queueName, {autoDelete: false, durable: true}, function () {
-//                console.log('\n///////////////////////////////////\n' +
-//                    '//////' + queueName + ' init complete ///\n' +
-//                    '////////////////////////////////////\n');
-//            });
-//        });
-//    });
-//
-//    //make queue fail, auto reconnect
-//    connection.on('error', function () {
-//        error('fail to connect rabbitmq server -- try to reconnect');
-//    });
-//})();
+(function () {
+    //create rabbitMQ connection
+    var connection = require(SOURCE_ROOT + '/handler/rabbitmq').getConn();
+
+    //make queue
+    connection.on('ready', function () {
+        // declare queue
+        var requestQueueList = SETTING.rabbitQueueList;
+
+        requestQueueList.forEach(function (queueName) {
+            connection.queue(queueName, {autoDelete: false, durable: true}, function () {
+                console.log(queueName + ' init complete \n');
+            });
+        });
+    });
+
+    //make queue fail, auto reconnect
+    connection.on('error', function () {
+        error('fail to connect rabbitmq server -- try to reconnect');
+    });
+})();
 
 app.set('port', process.env.PORT || 4000);
 
 var server = app.listen(app.get('port'), function () {
     console.log('\n//////////////////////////////////////////////////\n' +
         '//// frontWrite Server listening on port ' + app.get('port') + ' ////' +
-        '\n//////////////////////////////////////////////////');
+        '\n//////////////////////////////////////////////////\n');
 });
+
+//console.log('set test data');
+//
+//var session = require(SOURCE_ROOT + '/module/userSession/session');
+//
+//session.createSession('hello', function () {
+//    console.log('finish');
+//});
+//
+//session.getUsername('01f0ce503a7911e48d863ddf0514ad9dbc736b3f58ae429d82ecb25c2cb80275', function (err, result) {
+//    if (err) throw err;
+//    console.log(result);
+//});

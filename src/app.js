@@ -34,7 +34,7 @@ app.use('/test', function (req, res) {
 var threadRouter = require(SOURCE_ROOT + '/middleware/threadRouter');
 //var commentRouter = require(SOURCE_ROOT + '/middleware/commentRouter');
 
-app.route('/threads', threadRouter);
+app.use('/threads', threadRouter);
 //app.use('/comments', commentRouter);
 
 //route
