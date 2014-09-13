@@ -11,7 +11,7 @@ var errorCount = 0;
 
 client.on('error', function (err) {
     connected = false;
-    error('Redis connection ' + ++errorCount + ' error: ' + err);
+    error('fail to connect Redis ' + ++errorCount + ' times, ' + err);
     error('Trying to reconnect...');
     setTimeout(function () {
         if (errorCount > 10) throw new customError.RedisConnectionError('Error: Can not connect redis.');
@@ -20,7 +20,7 @@ client.on('error', function (err) {
 });
 
 client.on('connect', function () {
-    console.log('Redis connected: ' + new Date() + '\n');
+    info('Redis connected: ' + new Date());
     connected = true;
 });
 
