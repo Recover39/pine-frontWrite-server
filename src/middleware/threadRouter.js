@@ -37,6 +37,18 @@ router.param('thread_id', function (req, res, next, thread_id) {
     next();
 });
 
+router.use(function (req, res, next) {
+    var contentType = req.get('Content-Type');
+
+    if (contentType === 'application/json')
+        next();
+    else {
+        //fail
+        res.contentType('application/json');
+        res.send({result: "FAIL", message: 'error message'});
+    }
+});
+
 router.post('/:thread_id/like', function (req, res) {
     threadHandler.threadRequestHandler('threadLike', req, res);
 });

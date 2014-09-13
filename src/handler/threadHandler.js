@@ -18,6 +18,13 @@ exports.textOnlyNewCardQuery = function (req, res) {
         session.getUsername(req.body.author, function (err, result) {
             if (err) throw err;
 
+            if (!result) {
+                //fail
+                res.contentType('application/json');
+                res.send({result: "FAIL", message: 'error message'});
+                return;
+            }
+
             //data to send
             var message = {
                 author: result,
@@ -93,72 +100,66 @@ exports.postNewCard = function (req, res) {
 };
 
 exports.addComment = function (req, res) {
-    var reqContentType = req.get('Content-Type');
+    var connection = rabbitmq.getConn();
 
-    if (reqContentType === 'application/json') {
-        var connection = rabbitmq.getConn();
+    //set queue name, action name (identifier)
+    var mQueryAction = 'commentAdd';
 
-        //set queue name, action name (identifier)
-        var mQueryAction = 'commentAdd';
+    session.getUsername(req.body.user, function (err, result) {
+        if (err) throw err;
 
-        session.getUsername(req.body.user, function (err, result) {
-            if (err) throw err;
-
-            //data to send
-            var message = {
-                thread_id: req.thread_id,
-                author: result,
-                content: req.body.content,
-                pub_date: new Date().getTime(),
-                action: mQueryAction
-            };
-
-            connection.publish(serviceQueueName, message);
-
-            //success
+        if (!result) {
+            //fail
             res.contentType('application/json');
-            res.send({result: "SUCCESS"});
-        });
-    }
-    //Content-Type error
-    else {
-        //fail
+            res.send({result: "FAIL", message: 'error message'});
+            return;
+        }
+
+        //data to send
+        var message = {
+            thread_id: req.thread_id,
+            author: result,
+            content: req.body.content,
+            pub_date: new Date().getTime(),
+            action: mQueryAction
+        };
+
+        connection.publish(serviceQueueName, message);
+
+        //success
         res.contentType('application/json');
-        res.send({result: "FAIL", message: 'error message'});
-    }
+        res.send({result: "SUCCESS"});
+    });
 };
 
 exports.threadRequestHandler = function (action, req, res) {
-    var reqContentType = req.get('Content-Type');
+    var connection = rabbitmq.getConn();
 
-    if (reqContentType === 'application/json') {
-        var connection = rabbitmq.getConn();
+    //set action name (identifier)
+    var mQueryAction = String(action);
 
-        //set action name (identifier)
-        var mQueryAction = String(action);
+    session.getUsername(req.body.user, function (err, result) {
+        if (err) throw err;
 
-        session.getUsername(req.body.user, function (err, result) {
-            if (err) throw err;
-
-            //data to send
-            var message = {
-                thread_id: req.thread_id,
-                user: result,
-                time: new Date().getTime(),
-                action: mQueryAction
-            };
-
-            connection.publish(serviceQueueName, message);
-
-            //success
+        if (!result) {
+            //fail
             res.contentType('application/json');
-            res.send({result: "SUCCESS", message: message});
-        });
-    }
-    //Content-Type error
-    else {
-        //fail
+            res.send({result: "FAIL", message: 'error message'});
+            return;
+        }
+
+        //data to send
+        var message = {
+            thread_id: req.thread_id,
+            user: result,
+            time: new Date().getTime(),
+            action: mQueryAction
+        };
+
+        connection.publish(serviceQueueName, message);
+
+        //success
         res.contentType('application/json');
-        res.send({result: "FAIL", message: 'error message'});
-    }
+        res.send({result: "SUCCESS", message: message});
+    });
 };

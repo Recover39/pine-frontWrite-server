@@ -8,7 +8,7 @@
 var uuid = require('node-uuid');
 var async = require('async');
 
-var connection = require(SOURCE_ROOT+'/module/redis/redisconnection').getConnection();
+var connection = require(SOURCE_ROOT + '/module/redis/redisconnection').getConnection();
 var error = require('./_error');
 
 //six hours
@@ -33,35 +33,35 @@ var session = {};
  * @example
  *   session.createSession('+821012345678', function(err, result) { ... });
  */
-session.createSession = function(username, callback) {
-  if (arguments.length !== 2 || username === 'undefined' || username == 'function')
-    throw new Error('Arguments does not match.');
+session.createSession = function (username, callback) {
+    if (arguments.length !== 2 || username === 'undefined' || username == 'function')
+        throw new Error('Arguments does not match.');
 
-  var sessionid = generateSessionString();
-  var expireDate = getExpireDate(EXPIRE_SESSION_TIME);
+    var sessionid = generateSessionString();
+    var expireDate = getExpireDate(EXPIRE_SESSION_TIME);
 
-  async.series([
-    insertSessionKey,
-    setExpireKey
-  ],
-  function(err, results) {
-    callback(err, sessionid);
-  });
+    async.series([
+            insertSessionKey,
+            setExpireKey
+        ],
+        function (err, results) {
+            callback(err, sessionid);
+        });
 
-  function insertSessionKey(callback) {
-    connection.hmset(SCHEMA + sessionid, COL_USERNAME, username, COL_EXPIRE_DATE, expireDate.toUTCString(),
-      function(err, result) {
-       if (err) err = new error.SessionError('SessionError: Can not create session: ' + err);
-       callback(err);
-    });
-  }
+    function insertSessionKey(callback) {
+        connection.hmset(SCHEMA + sessionid, COL_USERNAME, username, COL_EXPIRE_DATE, expireDate.toUTCString(),
+            function (err, result) {
+                if (err) err = new error.SessionError('SessionError: Can not create session: ' + err);
+                callback(err);
+            });
+    }
 
-  function setExpireKey(callback) {
-    connection.expire(SCHEMA + sessionid, EXPIRE_SESSION_TIME, function(err, result) {
-      if (err) err = new error.SessionError('SessionError: Can not create session: ' + err);
-      callback(err);
-    });
-  }
+    function setExpireKey(callback) {
+        connection.expire(SCHEMA + sessionid, EXPIRE_SESSION_TIME, function (err, result) {
+            if (err) err = new error.SessionError('SessionError: Can not create session: ' + err);
+            callback(err);
+        });
+    }
 };
 
 /**
@@ -74,14 +74,14 @@ session.createSession = function(username, callback) {
  * @example
  *   session.getUsername('2a4c88d030601', function(err, result) { ... })
  */
-session.getUsername = function(sessionid, callback) {
-  if (arguments.length !== 2 || sessionid === 'undefined' || sessionid == 'function')
-    throw new Error('Arguments does not match.');
+session.getUsername = function (sessionid, callback) {
+    if (arguments.length !== 2 || sessionid === 'undefined' || sessionid == 'function')
+        throw new Error('Arguments does not match.');
 
-  connection.hget(SCHEMA + sessionid, COL_USERNAME, function(err, result) {
-    if (err) err = new error.SessionError('SessionError: Can not get session: ' + err);
-    callback(err, result);
-  });
+    connection.hget(SCHEMA + sessionid, COL_USERNAME, function (err, result) {
+        if (err) err = new error.SessionError('SessionError: Can not get session: ' + err);
+        callback(err, result);
+    });
 };
 
 /**
@@ -89,7 +89,7 @@ session.getUsername = function(sessionid, callback) {
  * @method generateSessionString
  */
 function generateSessionString() {
-  return uuid.v1().replace(/-/g, '') + uuid.v4().replace(/-/g, '');
+    return uuid.v1().replace(/-/g, '') + uuid.v4().replace(/-/g, '');
 }
 
 /**
@@ -98,9 +98,9 @@ function generateSessionString() {
  * @return date object set expireHours
  */
 function getExpireDate(expireSeconds) {
-  var now = new Date();
-  now.setTime(now.getTime() + expireSeconds);
-  return now;
+    var now = new Date();
+    now.setTime(now.getTime() + expireSeconds);
+    return now;
 }
 
 module.exports = session;

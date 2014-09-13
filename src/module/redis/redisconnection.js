@@ -11,8 +11,10 @@ var errorCount = 0;
 
 client.on('error', function (err) {
     connected = false;
-    error('fail to connect Redis ' + ++errorCount + ' times, ' + err);
-    error('Trying to reconnect...');
+    if (errorCount % 3 === 0 && errorCount != 0) {
+        error('fail to connect Redis ' + ++errorCount + ' times, ' + err);
+        error('Trying to reconnect...');
+    }
     setTimeout(function () {
         if (errorCount > 10) throw new customError.RedisConnectionError('Error: Can not connect redis.');
         client = redis.createClient(SETTING.redis.port, SETTING.redis.host);

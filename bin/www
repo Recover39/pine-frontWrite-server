@@ -54,6 +54,8 @@ var app = require(SOURCE_ROOT + '/app');
 //    });
 //}
 
+//rabbitmq connection control
+
 //init queue one time
 (function () {
     //create rabbitMQ connection
@@ -81,17 +83,17 @@ var app = require(SOURCE_ROOT + '/app');
             error('fail to connect RabbitMQ ' + ++errorCount + ' times, ' + err);
             error('Trying to reconnect...');
         }
-        errorCount++;
     });
 })();
 
 app.set('port', process.env.PORT || 4000);
 
 console.log('\n////////////////////////////////////////////////////////////////////////');
-console.log('frontWrite Server now listening: ' + new Date() + '\n');
+console.log('frontWrite Server now listening: ' + new Date());
+console.log('////////////////////////////////////////////////////////////////////////\n');
 
 var server = app.listen(app.get('port'), function () {
-    info('server listening on port: ' + app.get('port'));
+    info('Server listening on port: ' + app.get('port'));
 });
 
 //console.log('set test data');

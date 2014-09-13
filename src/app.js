@@ -31,14 +31,13 @@ app.use('/test', function (req, res) {
     res.render('test');
 });
 
-var threadRouter = require(SOURCE_ROOT + '/middleware/threadRouter');
-//var commentRouter = require(SOURCE_ROOT + '/middleware/commentRouter');
+var threadRouter = require(SOURCE_ROOT + '/middleware/threadRouter'),
+    commentRouter = require(SOURCE_ROOT + '/middleware/commentRouter'),
+    friendRouter = require(SOURCE_ROOT + '/middleware/friendRouter');
 
 app.use('/threads', threadRouter);
-//app.use('/comments', commentRouter);
-
-//route
-//router.route(app);
+app.use('/comments', commentRouter);
+app.use('/friends', friendRouter);
 
 //404 error
 app.use(function (req, res, next) {

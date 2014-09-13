@@ -9,39 +9,34 @@ var session = require(SOURCE_ROOT + '/module/userSession/session');
 
 var serviceQueueName = 'requestQueue';
 
-exports.commentRequestHandler = function (action, queueName, req, res) {
-    var reqContentType = req.get('Content-Type');
+exports.commentRequestHandler = function (action, req, res) {
+    var connection = rabbitmq.getConn();
 
-    if (reqContentType === 'application/json') {
-        var connection = rabbitmq.getConn();
+    //set queue name, action name (identifier)
+    var mQueryAction = String(action);
 
-        //set queue name, action name (identifier)
-        var mQueryAction = String(action);
+    session.getUsername(req.body.user, function (err, result) {
+        if (err) throw err;
 
-        session.getUsername(req.body.user, function (err, result) {
-            if (err) throw err;
-
-            //data to send
-            var message = {
-                comment_id: req.comment_id,
-                user: result,
-                time: new Date().getTime(),
-                action: mQueryAction
-            };
-
-            connection.on('ready', function () {
-                connection.publish(serviceQueueName, message);
-            });
-
-            //success
+        if (!result) {
+            //fail
             res.contentType('application/json');
-            res.send({result: "SUCCESS"});
-        });
-    }
-    //Content-Type error
-    else {
-        //fail
+            res.send({result: "FAIL", message: 'error message'});
+            return;
+        }
+
+        //data to send
+        var message = {
+            comment_id: req.comment_id,
+            user: result,
+            time: new Date().getTime(),
+            action: mQueryAction
+        };
+
+        connection.publish(serviceQueueName, message);
+
+        //success
         res.contentType('application/json');
-        res.send({result: "FAIL", message: 'error message'});
-    }
+        res.send({result: "SUCCESS"});
+    });
 };
