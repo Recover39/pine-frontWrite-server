@@ -15,7 +15,7 @@ exports.commentRequestHandler = function (action, req, res) {
     //set queue name, action name (identifier)
     var mQueryAction = String(action);
 
-    session.getUsername(req.body.user, function (err, result) {
+    session.getUsername(req.cookies.sessionId, function (err, result) {
         if (err) throw err;
 
         if (!result) {

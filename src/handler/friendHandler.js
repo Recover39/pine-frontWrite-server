@@ -12,9 +12,7 @@ var serviceQueueName = 'requestQueue';
 exports.addFriend = function (req, res) {
     var connection = rabbitmq.getConn();
 
-    session.getUsername(req.body.user, function (err, result) {
-        console.log(result);
-
+    session.getUsername(req.cookies.sessionId, function (err, result) {
         if (err) throw err;
 
         if (!result) {
@@ -43,7 +41,7 @@ exports.addFriend = function (req, res) {
 exports.deleteFriend = function (req, res) {
     var connection = rabbitmq.getConn();
 
-    session.getUsername(req.body.user, function (err, result) {
+    session.getUsername(req.cookies.sessionId, function (err, result) {
         if (err) throw err;
 
         if (!result) {

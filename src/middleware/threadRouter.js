@@ -14,8 +14,6 @@ router.use(function (req, res, next) {
 
     if (contentType === 'application/json')
         next();
-    else if (/multipart\/form-data;+/.test(contentType))
-        next();
     else {
         //fail
         res.contentType('application/json');
@@ -24,7 +22,7 @@ router.use(function (req, res, next) {
 });
 
 router.post('/', function (req, res) {
-    threadHandler.textOnlyNewCardQuery(req, res);
+    threadHandler.postNewThread(req, res);
 });
 
 router.param('thread_id', function (req, res, next, thread_id) {
@@ -35,18 +33,6 @@ router.param('thread_id', function (req, res, next, thread_id) {
     }
     req.thread_id = thread_id;
     next();
-});
-
-router.use(function (req, res, next) {
-    var contentType = req.get('Content-Type');
-
-    if (contentType === 'application/json')
-        next();
-    else {
-        //fail
-        res.contentType('application/json');
-        res.send({result: "FAIL", message: 'error message'});
-    }
 });
 
 router.post('/:thread_id/like', function (req, res) {

@@ -31,10 +31,12 @@ app.use('/test', function (req, res) {
     res.render('test');
 });
 
-var threadRouter = require(SOURCE_ROOT + '/middleware/threadRouter'),
+var userRouter = require(SOURCE_ROOT + '/middleware/userRouter'),
+    threadRouter = require(SOURCE_ROOT + '/middleware/threadRouter'),
     commentRouter = require(SOURCE_ROOT + '/middleware/commentRouter'),
     friendRouter = require(SOURCE_ROOT + '/middleware/friendRouter');
 
+app.use('/user', userRouter);
 app.use('/threads', threadRouter);
 app.use('/comments', commentRouter);
 app.use('/friends', friendRouter);
