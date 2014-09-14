@@ -100,7 +100,7 @@ var server = app.listen(app.get('port'), function () {
 //
 //var session = require(SOURCE_ROOT + '/module/userSession/session');
 //
-//session.createSession('hello', function () {
+//session.createSession('yellow', function () {
 //    console.log('finish');
 //});
 //

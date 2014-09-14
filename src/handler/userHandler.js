@@ -17,6 +17,7 @@ exports.registerUser = function (req, res) {
         //data to send
         var message = {
             Id : req.body.userName,
+            registerDate : new Date().getTime(),
             action : 'userRegister'
         };
 

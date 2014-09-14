@@ -115,6 +115,6 @@ exports.threadRequestHandler = function (action, req, res) {
 
         //success
         res.contentType('application/json');
-        res.send({result: "SUCCESS", message: message});
+        res.send({result: "SUCCESS"});
     });
 };

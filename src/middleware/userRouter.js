@@ -21,7 +21,7 @@ router.use(function (req, res, next) {
     }
 });
 
-router.post('/', function (req, res) {
+router.post('/register', function (req, res) {
     userHandler.registerUser(req, res);
 });
 
